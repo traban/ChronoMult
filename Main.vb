@@ -23,8 +23,6 @@
   Private Const BUT_WIDTH = 128
   Private Const BUT_HEIGHT = 24
 
-  Private NB_TRACKS = 8
-
   Private GroupFrames(MAX_TRACKS) As GroupBox
   Private LabName(MAX_TRACKS) As Label
   Private LabTime(MAX_TRACKS, NB_TIMES, NB_DIGITS) As Label
@@ -66,7 +64,7 @@
       LabPosition(I) = New Label
       Me.Controls.Add(LabPosition(I))
       LabPosition(I).Font = NAME_FONT
-      LabPosition(I).BackColor = Color.OliveDrab
+      LabPosition(I).BackColor = Color.DarkGoldenrod
       LabPosition(I).ForeColor = Color.Yellow
       LabPosition(I).Text = Chr(Asc("A") + I)
       LabPosition(I).AutoSize = False
@@ -109,14 +107,17 @@
         For K = 0 To NB_DIGITS - 1
           If J = 2 Then
             If K = 0 Then
+              ' Track identifier
               ForeCol = Color.Yellow
-              BackCol = Color.OliveDrab
+              BackCol = Color.Black
             ElseIf K = 1 Then
+              ' Position
               ForeCol = Color.White
-              BackCol = Color.Olive
+              BackCol = Color.DarkGoldenrod
             ElseIf K Then
-              ForeCol = Color.Yellow
-              BackCol = Color.OliveDrab
+              ' Laps number
+              ForeCol = Color.LightGreen
+              BackCol = Color.Black
             End If
           End If
           If K < 2 Then
@@ -163,7 +164,7 @@
       LabName(I) = New Label
       GroupFrames(I).Controls.Add(LabName(I))
       LabName(I).Font = NAME_FONT
-      LabName(I).BackColor = Color.OliveDrab
+      LabName(I).BackColor = Color.DarkGoldenrod
       LabName(I).ForeColor = Color.LightGreen
       LabName(I).Text = Configuration.GetName(I)
       LabName(I).AutoSize = False
@@ -380,7 +381,6 @@
 
   Private Sub Main_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
     Configuration.InitConf()
-    NB_TRACKS = Configuration.GetNbTracks
     Init()
     Restart()
     Timer.Start()
@@ -434,13 +434,15 @@
   End Sub
 
   Private Sub ButConf_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButConf.Click
+    Timer.Stop()
     For I = 0 To NB_TRACKS - 1
       Me.Controls.Remove(GroupFrames(I))
       Me.Controls.Remove(LabPosition(I))
     Next
     Configuration.ShowDialog()
-    NB_TRACKS = Configuration.GetNbTracks
     Init()
+    Restart()
+    Timer.Start()
   End Sub
 
   Private Sub ButClrBest_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButClrBest.Click

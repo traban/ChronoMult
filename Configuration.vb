@@ -21,18 +21,25 @@
   Private TxtNames(MAX_TRACKS) As TextBox
   Private LabNames(MAX_TRACKS) As Label
 
+  Private SensorsLevel(MAX_TRACKS) As Integer
+  Private SensorsFiltIdx(MAX_TRACKS) As Integer
+
+  Private InitDone As Boolean
+
   Public Sub InitConf()
     Dim Port As String
     Dim Valid As Boolean
 
     Dim Path As String
 
+    InitDone = False
+
     ' Group box chrono
     LabTrack.AutoSize = False
     LabTrack.Width = LBL_WIDTH
     LabTrack.Height = BUT_HEIGHT
     LabTrack.Left = MARG
-    LabTrack.Top = 4 * MARG
+    LabTrack.Top = 3 * MARG
 
     ListTracks.Width = BUT_BIG_WIDTH
     ListTracks.Height = BUT_HEIGHT
@@ -42,7 +49,7 @@
     For I = 1 To MAX_TRACKS
       ListTracks.Items.Add(I.ToString)
     Next
-    ListTracks.SelectedItem = "2"
+    ListTracks.SelectedIndex = NB_TRACKS - 1
 
     For I = 0 To MAX_TRACKS - 1
       LabNames(I) = New Label
@@ -50,7 +57,7 @@
       LabNames(I).AutoSize = False
       LabNames(I).Width = LBL_WIDTH
       LabNames(I).Height = BUT_HEIGHT
-      LabNames(I).Top = ListTracks.Bottom + 2 * MARG + I * (BUT_HEIGHT + MARG / 2)
+      LabNames(I).Top = ListTracks.Bottom + 2 * MARG + I * (BUT_HEIGHT + MARG / 4)
       LabNames(I).Left = MARG
       LabNames(I).Text = Chr(Asc("A") + I)
       TxtNames(I) = New TextBox
@@ -65,7 +72,7 @@
     LabPort.Width = LBL_WIDTH
     LabPort.Height = BUT_HEIGHT
     LabPort.Left = MARG
-    LabPort.Top = 4 * MARG
+    LabPort.Top = 3 * MARG
 
     ListPorts.Width = BUT_BIG_WIDTH
     ListPorts.Height = BUT_HEIGHT
@@ -144,14 +151,15 @@
     LabSensorLevel.Width = LBL_BIG_WIDTH
     LabSensorLevel.Height = BUT_HEIGHT
     LabSensorLevel.Left = MARG
-    LabSensorLevel.Top = 4 * MARG
+    LabSensorLevel.Top = 3 * MARG
 
-    ListSensorLevel.Width = BUT_BIG_WIDTH
+    ListSensorLevel.Width = BUT_MID_WIDTH
     ListSensorLevel.Height = BUT_HEIGHT
     ListSensorLevel.Left = LabSensorLevel.Right + MARG
     ListSensorLevel.Top = LabSensorLevel.Top
     ListSensorLevel.Items.Add("Low (0)")
     ListSensorLevel.Items.Add("High (1)")
+    ListSensorLevel.SelectedIndex = 0
 
     LabSensorFilt.AutoSize = False
     LabSensorFilt.Width = LBL_BIG_WIDTH
@@ -159,26 +167,37 @@
     LabSensorFilt.Left = MARG
     LabSensorFilt.Top = LabSensorLevel.Bottom + MARG
 
-    ListSensorFilt.Width = BUT_BIG_WIDTH
+    ListSensorFilt.Width = BUT_MID_WIDTH
     ListSensorFilt.Height = BUT_HEIGHT
     ListSensorFilt.Left = LabSensorFilt.Right + MARG
     ListSensorFilt.Top = LabSensorFilt.Top
     ListSensorFilt.Items.Add("250 us")
     ListSensorFilt.Items.Add("500 us")
-    ListSensorFilt.Items.Add("750 us")
     ListSensorFilt.Items.Add("1 ms")
-    ListSensorFilt.Items.Add("1.5 ms")
     ListSensorFilt.Items.Add("2 ms")
-    ListSensorFilt.Items.Add("3 ms")
     ListSensorFilt.Items.Add("5 ms")
-    ListSensorFilt.Items.Add("7 ms")
     ListSensorFilt.Items.Add("10 ms")
-    ListSensorFilt.Items.Add("15 ms")
     ListSensorFilt.Items.Add("20 ms")
-    ListSensorFilt.Items.Add("30 ms")
-    ListSensorFilt.Items.Add("40 ms")
     ListSensorFilt.Items.Add("50 ms")
-    ListSensorFilt.Items.Add("60 ms")
+    ListSensorFilt.Items.Add("100 ms")
+    ListSensorFilt.Items.Add("200 ms")
+    ListSensorFilt.Items.Add("500 ms")
+    ListSensorFilt.SelectedIndex = 2
+
+    ListSensors.Width = BUT_BIG_WIDTH
+    ListSensors.Height = BUT_HEIGHT * 6
+    ListSensors.Left = LabConf.Left
+    ListSensors.Top = ListSensorLevel.Top
+
+    ButAppAll.Width = ListSensorLevel.Right - LabSensorLevel.Left
+    ButAppAll.Height = BUT_HEIGHT
+    ButAppAll.Left = LabSensorLevel.Left
+    ButAppAll.Top = ListSensorFilt.Bottom + 2 * MARG
+
+    ButAppSel.Width = ButAppAll.Width
+    ButAppSel.Height = BUT_HEIGHT
+    ButAppSel.Left = LabSensorLevel.Left
+    ButAppSel.Top = ButAppAll.Bottom + MARG
 
     GroupBoxChrono.Height = TxtNames(MAX_TRACKS - 1).Bottom + MARG
     GroupBoxChrono.Left = MARG
@@ -188,7 +207,7 @@
     GroupBoxSerial.Left = MARG
     GroupBoxSerial.Top = GroupBoxChrono.Bottom + MARG
 
-    GroupBoxSensor.Height = ListSensorFilt.Bottom + MARG
+    GroupBoxSensor.Height = ListSensors.Bottom + MARG
     GroupBoxSensor.Left = MARG
     GroupBoxSensor.Top = GroupBoxSerial.Bottom + MARG
 
@@ -212,6 +231,12 @@
     ButLoadConf.Left = ButDefConf.Right + MARG
     ButLoadConf.Top = GroupBoxSensor.Bottom + 2 * MARG
 
+    ButArduino.Width = BUT_MID_WIDTH
+    ButArduino.Height = BUT_HEIGHT
+    ButArduino.Left = ButLoadConf.Right + MARG
+    ButArduino.Top = GroupBoxSensor.Bottom + 2 * MARG
+    ButArduino.ForeColor = Color.Red
+
     ButConf.Select()
 
     Me.ClientSize = New Size(GroupBoxSensor.Right + MARG, ButConf.Bottom + MARG)
@@ -225,7 +250,17 @@
       DefaultConf()
     End If
     UpdateSerialConf()
+    InitDone = True
+
+    For I = 0 To NB_TRACKS - 1
+      TxtNames(I).Enabled = True
+    Next
+    For I = NB_TRACKS To MAX_TRACKS - 1
+      TxtNames(I).Enabled = False
+    Next
+    UpdateListSensors()
     Me.ShowDialog()
+
   End Sub
 
   ' Update the serial characteristics
@@ -262,7 +297,8 @@
     End If
 
     ' Acquire number of tracks
-    ListTracks.SelectedItem = Nodes.Current.GetAttribute("tracks", "")
+    NB_TRACKS = CInt(Nodes.Current.GetAttribute("tracks", ""))
+    ListTracks.SelectedIndex = NB_TRACKS - 1
     ' Access NAME node
     Nodes.Current.MoveToFirstChild()
     ' Verification 
@@ -273,6 +309,8 @@
     I = 0
     Do
       TxtNames(I).Text = Nodes.Current.GetAttribute("ident", "")
+      SensorsLevel(I) = CInt(Nodes.Current.GetAttribute("level", ""))
+      SensorsFiltIdx(I) = CInt(Nodes.Current.GetAttribute("filt_idx", ""))
       I += 1
     Loop While Nodes.Current.MoveToNext()
 
@@ -301,16 +339,7 @@
       ListPorts.SelectedItem = ""
     End If
 
-    ' Access SENSOR node
-    Nodes.Current.MoveToNext()
-    ' Verification
-    If Nodes.Current.Name <> "SENSOR" Then
-      Return False
-    End If
-
-    ' Acquire serial parameters
-    ListSensorLevel.SelectedItem = Nodes.Current.GetAttribute("level", "")
-    ListSensorFilt.SelectedItem = Nodes.Current.GetAttribute("filt", "")
+    UpdateListSensors()
 
     Return True
   End Function
@@ -324,11 +353,13 @@
       ' Write XML data.
       GenXml.WriteStartElement("CONFIGURATION")
       GenXml.WriteStartElement("CHRONO")
-      GenXml.WriteAttributeString("tracks", "", ListTracks.SelectedItem)
+      GenXml.WriteAttributeString("tracks", "", NB_TRACKS)
 
       For I = 0 To MAX_TRACKS - 1
         GenXml.WriteStartElement("NAME")
         GenXml.WriteAttributeString("ident", "", TxtNames(I).Text)
+        GenXml.WriteAttributeString("level", "", SensorsLevel(I).ToString)
+        GenXml.WriteAttributeString("filt_idx", "", SensorsFiltIdx(I).ToString)
         GenXml.WriteEndElement()
       Next
 
@@ -338,17 +369,22 @@
       GenXml.WriteAttributeString("rate", "", ListRates.SelectedItem)
       GenXml.WriteAttributeString("stop", "", ListStopBits.SelectedItem)
       GenXml.WriteEndElement()
-      GenXml.WriteStartElement("SENSOR")
-      GenXml.WriteAttributeString("level", "", ListSensorLevel.SelectedItem)
-      GenXml.WriteAttributeString("filt", "", ListSensorFilt.SelectedItem)
-      GenXml.WriteEndElement()
       GenXml.Flush()
 
     End Using
 
   End Sub
 
+  Private Sub UpdateListSensors()
+    ListSensors.Items.Clear()
+    For I = 0 To NB_TRACKS - 1
+      ListSensors.Items.Add(Chr(Asc("A") + I) & " : " & ListSensorLevel.Items(SensorsLevel(I)) & ", " & ListSensorFilt.Items(SensorsFiltIdx(I)))
+    Next
+
+  End Sub
+
   Private Sub DefaultConf()
+    NB_TRACKS = 2
     ListTracks.SelectedItem = "2"
     For I = 0 To MAX_TRACKS - 1
       TxtNames(I).Text = "Track " & Chr(Asc("A") + I)
@@ -405,23 +441,31 @@
 
   ' Verification of the serial communication
   Private Sub CheckSerial()
-    Dim Buf(3) As Byte
+    Dim Buf(MAX_TRACKS + 2) As Byte
     Dim C, Verif As Byte
     Dim N As Integer
 
-    ' Flush the buffer
-    While Serial.BytesToRead > 0
-      C = Serial.ReadByte
-    End While
+    ' Wait to allow the complete reception of possible data 
+    System.Threading.Thread.Sleep(100)
+    ' Send the stop scan command to the embedded system
+    Serial.Write("CS")
+    System.Threading.Thread.Sleep(50)
+    If Not (Serial.BytesToRead = 1 AndAlso Serial.ReadByte = Asc("S")) Then
+      MsgBox("Connection with embedded unit failed " & vbCrLf & "Bad response to CS command)")
+      SerialOk = False
+      Return
+    End If
     ' Send the configuration to the embedded system 'CF'
     Serial.Write("CF")
-    ' Numbet of tracks
-    Buf(0) = ListTracks.SelectedIndex
-    ' Sensor level (0->low, 1->high)
-    Buf(1) = ListSensorLevel.SelectedIndex
-    ' Sensor filtering time index
-    Buf(2) = ListSensorFilt.SelectedIndex
-    Serial.Write(Buf, 0, 3)
+    ' Number of tracks
+    Buf(0) = NB_TRACKS
+    For I = 0 To MAX_TRACKS
+      ' Sensor level (0->low, 1->high) on MSB, Sensor filtering time index on LSB
+      Buf(I + 1) = SensorsLevel(I) * 16 + SensorsFiltIdx(I)
+    Next
+    ' Terminal character
+    Buf(MAX_TRACKS + 1) = Asc("*")
+    Serial.Write(Buf, 0, MAX_TRACKS + 2)
 
     ' Wait to allow the complete transmission of the configuration response by the embedded system
     System.Threading.Thread.Sleep(100)
@@ -432,14 +476,22 @@
       C = Serial.ReadByte
       Verif = Serial.ReadByte
       EmbeddedVersion = Serial.ReadByte
-      If C = Asc("C") AndAlso Verif = Buf(0) * 32 + Buf(1) * 16 + Buf(2) Then
+      If C = Asc("F") AndAlso Verif = Buf(0) Then
+        ' Send the restart scan command to the embedded system
+        Serial.Write("CR")
+        ' Get possible data
+        System.Threading.Thread.Sleep(100)
+        ' Flush the buffer
+        While Serial.BytesToRead > 0
+          C = Serial.ReadByte
+        End While
         MsgBox("Connection with embedded unit OK")
       Else
-        MsgBox("Connection with embedded unit failed (" & CInt(Verif) & ")")
+        MsgBox("Connection with embedded unit failed " & vbCrLf & "Bad response to CF command)")
         SerialOk = False
       End If
     Else
-      MsgBox("Bad response length (" & CInt(N) & ")")
+      MsgBox("Connection with embedded unit failed " & vbCrLf & "Bad response length to CF command)")
       SerialOk = False
     End If
 
@@ -477,10 +529,6 @@
     Return ListPorts.SelectedItem
   End Function
 
-  Public Function GetNbTracks() As Integer
-    Return CInt(ListTracks.SelectedItem)
-  End Function
-
   Private Sub ButConf_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButConf.Click
     SaveConf(CONFIG_FILE)
     ConfigureSerial()
@@ -508,5 +556,59 @@
 
   Private Sub ListStopBits_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ListStopBits.SelectedIndexChanged
     UpdateSerialConf()
+  End Sub
+
+  Private Sub ListTracks_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ListTracks.SelectedIndexChanged
+    If InitDone Then
+      NB_TRACKS = ListTracks.SelectedIndex + 1
+      For I = 0 To NB_TRACKS - 1
+        TxtNames(I).Enabled = True
+      Next
+      For I = NB_TRACKS To MAX_TRACKS - 1
+        TxtNames(I).Enabled = False
+      Next
+      UpdateListSensors()
+    End If
+  End Sub
+
+  Private Sub ButAppAll_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButAppAll.Click
+    For I = 0 To NB_TRACKS - 1
+      SensorsLevel(I) = ListSensorLevel.SelectedIndex
+      SensorsFiltIdx(I) = ListSensorFilt.SelectedIndex
+    Next
+    UpdateListSensors()
+  End Sub
+
+  Private Sub ButAppSel_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButAppSel.Click
+    Dim N As Integer
+
+    For I = 0 To ListSensors.SelectedIndices.Count - 1
+      N = ListSensors.SelectedIndices(I)
+      SensorsLevel(N) = ListSensorLevel.SelectedIndex
+      SensorsFiltIdx(N) = ListSensorFilt.SelectedIndex
+    Next
+    UpdateListSensors()
+
+  End Sub
+
+  Private Sub ButArduino_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ButArduino.Click
+    Dim Port As String
+    Dim Rate As String
+    Dim Desc As Integer
+
+    If ListPorts.Items.Count > 0 AndAlso ListPorts.SelectedItem <> "" Then
+      Port = ListPorts.SelectedItem
+      Rate = ListRates.SelectedItem
+
+
+      If MsgBox("The Arduino card will be flashed on port " & Port & ", at rate of " & Rate & "Bds", vbOKCancel) = vbOK Then
+        Desc = FreeFile()
+        FileOpen(Desc, "Flash.bat", OpenMode.Output)
+        FileSystem.Print(Desc, "avrdude.exe -C avrdude.conf -v -patmega328p -carduino -P" & Port & " -b" & Rate & " -D -Uflash:w:ChronoNano.hex:i" & vbCrLf)
+        FileSystem.Print(Desc, "pause" & vbCrLf)
+        FileClose(Desc)
+        Shell("Flash.bat", AppWinStyle.NormalFocus)
+      End If
+    End If
   End Sub
 End Class

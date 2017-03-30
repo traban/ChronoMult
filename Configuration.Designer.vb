@@ -39,10 +39,14 @@ Partial Class Configuration
     Me.ButLoadConf = New System.Windows.Forms.Button()
     Me.ButConf = New System.Windows.Forms.Button()
     Me.GroupBoxSensor = New System.Windows.Forms.GroupBox()
+    Me.ButAppSel = New System.Windows.Forms.Button()
+    Me.ButAppAll = New System.Windows.Forms.Button()
+    Me.ListSensors = New System.Windows.Forms.ListBox()
     Me.ListSensorFilt = New System.Windows.Forms.ComboBox()
     Me.LabSensorFilt = New System.Windows.Forms.Label()
     Me.ListSensorLevel = New System.Windows.Forms.ComboBox()
     Me.LabSensorLevel = New System.Windows.Forms.Label()
+    Me.ButArduino = New System.Windows.Forms.Button()
     Me.GroupBoxSerial.SuspendLayout()
     Me.GroupBoxChrono.SuspendLayout()
     Me.GroupBoxSensor.SuspendLayout()
@@ -116,7 +120,7 @@ Partial Class Configuration
     Me.GroupBoxSerial.Controls.Add(Me.ListStopBits)
     Me.GroupBoxSerial.Controls.Add(Me.ListRates)
     Me.GroupBoxSerial.Controls.Add(Me.ListPorts)
-    Me.GroupBoxSerial.Location = New System.Drawing.Point(19, 180)
+    Me.GroupBoxSerial.Location = New System.Drawing.Point(19, 114)
     Me.GroupBoxSerial.Name = "GroupBoxSerial"
     Me.GroupBoxSerial.Size = New System.Drawing.Size(390, 202)
     Me.GroupBoxSerial.TabIndex = 9
@@ -129,7 +133,7 @@ Partial Class Configuration
     Me.GroupBoxChrono.Controls.Add(Me.LabTrack)
     Me.GroupBoxChrono.Location = New System.Drawing.Point(19, 21)
     Me.GroupBoxChrono.Name = "GroupBoxChrono"
-    Me.GroupBoxChrono.Size = New System.Drawing.Size(390, 140)
+    Me.GroupBoxChrono.Size = New System.Drawing.Size(390, 87)
     Me.GroupBoxChrono.TabIndex = 10
     Me.GroupBoxChrono.TabStop = False
     Me.GroupBoxChrono.Text = "Chrono"
@@ -180,16 +184,46 @@ Partial Class Configuration
     '
     'GroupBoxSensor
     '
+    Me.GroupBoxSensor.Controls.Add(Me.ButAppSel)
+    Me.GroupBoxSensor.Controls.Add(Me.ButAppAll)
+    Me.GroupBoxSensor.Controls.Add(Me.ListSensors)
     Me.GroupBoxSensor.Controls.Add(Me.ListSensorFilt)
     Me.GroupBoxSensor.Controls.Add(Me.LabSensorFilt)
     Me.GroupBoxSensor.Controls.Add(Me.ListSensorLevel)
     Me.GroupBoxSensor.Controls.Add(Me.LabSensorLevel)
-    Me.GroupBoxSensor.Location = New System.Drawing.Point(19, 404)
+    Me.GroupBoxSensor.Location = New System.Drawing.Point(28, 332)
     Me.GroupBoxSensor.Name = "GroupBoxSensor"
-    Me.GroupBoxSensor.Size = New System.Drawing.Size(389, 91)
+    Me.GroupBoxSensor.Size = New System.Drawing.Size(389, 147)
     Me.GroupBoxSensor.TabIndex = 11
     Me.GroupBoxSensor.TabStop = False
     Me.GroupBoxSensor.Text = "Sensors"
+    '
+    'ButAppSel
+    '
+    Me.ButAppSel.Location = New System.Drawing.Point(29, 124)
+    Me.ButAppSel.Name = "ButAppSel"
+    Me.ButAppSel.Size = New System.Drawing.Size(195, 22)
+    Me.ButAppSel.TabIndex = 6
+    Me.ButAppSel.Text = "Apply on selected sensors"
+    Me.ButAppSel.UseVisualStyleBackColor = True
+    '
+    'ButAppAll
+    '
+    Me.ButAppAll.Location = New System.Drawing.Point(29, 92)
+    Me.ButAppAll.Name = "ButAppAll"
+    Me.ButAppAll.Size = New System.Drawing.Size(196, 21)
+    Me.ButAppAll.TabIndex = 5
+    Me.ButAppAll.Text = "Apply on all Sensors"
+    Me.ButAppAll.UseVisualStyleBackColor = True
+    '
+    'ListSensors
+    '
+    Me.ListSensors.FormattingEnabled = True
+    Me.ListSensors.Location = New System.Drawing.Point(253, 20)
+    Me.ListSensors.Name = "ListSensors"
+    Me.ListSensors.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
+    Me.ListSensors.Size = New System.Drawing.Size(110, 108)
+    Me.ListSensors.TabIndex = 4
     '
     'ListSensorFilt
     '
@@ -225,12 +259,22 @@ Partial Class Configuration
     Me.LabSensorLevel.TabIndex = 0
     Me.LabSensorLevel.Text = "Active Level"
     '
+    'ButArduino
+    '
+    Me.ButArduino.Location = New System.Drawing.Point(207, 508)
+    Me.ButArduino.Name = "ButArduino"
+    Me.ButArduino.Size = New System.Drawing.Size(74, 20)
+    Me.ButArduino.TabIndex = 12
+    Me.ButArduino.Text = "Arduino"
+    Me.ButArduino.UseVisualStyleBackColor = True
+    '
     'Configuration
     '
     Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
     Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
     Me.ClientSize = New System.Drawing.Size(436, 538)
     Me.ControlBox = False
+    Me.Controls.Add(Me.ButArduino)
     Me.Controls.Add(Me.ButConf)
     Me.Controls.Add(Me.ButDefConf)
     Me.Controls.Add(Me.GroupBoxSensor)
@@ -270,4 +314,8 @@ Partial Class Configuration
   Friend WithEvents LabSensorLevel As System.Windows.Forms.Label
   Friend WithEvents ButLoadConf As System.Windows.Forms.Button
   Friend WithEvents ButDefConf As System.Windows.Forms.Button
+  Friend WithEvents ListSensors As System.Windows.Forms.ListBox
+  Friend WithEvents ButAppSel As System.Windows.Forms.Button
+  Friend WithEvents ButAppAll As System.Windows.Forms.Button
+  Friend WithEvents ButArduino As System.Windows.Forms.Button
 End Class
